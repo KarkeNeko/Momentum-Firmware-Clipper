@@ -77,7 +77,7 @@ static const uint8_t enclave_signature_expected[ENCLAVE_FACTORY_KEY_SLOTS][ENCLA
     {0xBD, 0x0F, 0xD9, 0xA8, 0xAD, 0xAD, 0xA3, 0xA1, 0x9B, 0x5C, 0x9E, 0x45, 0x91, 0xC5, 0xDF, 0xE1},
     {0x56, 0x64, 0x9F, 0xBF, 0x50, 0x6D, 0xA9, 0x64, 0x32, 0x83, 0x18, 0xF6, 0xD3, 0x58, 0x75, 0xAB},
     {0xE7, 0x9F, 0x53, 0xB9, 0xD0, 0x38, 0x49, 0x88, 0x23, 0x8F, 0x5D, 0x88, 0x7B, 0x82, 0x10, 0x7B},
-    {0x51, 0xEF, 0x65, 0x78, 0xD2, 0x4D, 0x0B, 0xE1, 0xB1, 0xE0, 0x8C, 0x48, 0xDD, 0xC6, 0xA9, 0x9C}
+    {0x51, 0xEF, 0x65, 0x78, 0xD2, 0x4D, 0x0B, 0xE1, 0xB1, 0xE0, 0x8C, 0x48, 0xDD, 0xC6, 0xA9, 0x9C},
 };
 
 void furi_hal_crypto_init(void) {
@@ -142,9 +142,11 @@ bool furi_hal_crypto_enclave_verify(uint8_t* keys_nb, uint8_t* valid_keys_nb) {
                 keys_valid +=
                     memcmp(buffer, enclave_signature_expected[key_slot], ENCLAVE_SIGNATURE_SIZE) ==
                     0;
+                /*
                     FURI_LOG_D(TAG, "Encrypted signature: %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x",
                         buffer[0], buffer[1], buffer[2], buffer[3], buffer[4], buffer[5], buffer[6], buffer[7],
                         buffer[8], buffer[9], buffer[10], buffer[11], buffer[12], buffer[13], buffer[14], buffer[15]);
+                    */
             }
             furi_hal_crypto_enclave_unload_key(key_slot + 1);
         }
@@ -154,11 +156,12 @@ bool furi_hal_crypto_enclave_verify(uint8_t* keys_nb, uint8_t* valid_keys_nb) {
     *valid_keys_nb = keys_valid;
 
     for(size_t key_slot = 0; key_slot < 100; key_slot++) {
-    if(furi_hal_crypto_enclave_load_key(key_slot + 1, enclave_signature_iv[0])) {
-        FURI_LOG_D(TAG, "Key %u loaded", key_slot + 1);
-        furi_hal_crypto_enclave_unload_key(key_slot + 1);
+        if(furi_hal_crypto_enclave_load_key(key_slot + 1, enclave_signature_iv[0])) {
+            FURI_LOG_D(TAG, "Key %u detected", key_slot + 1);
+            furi_hal_crypto_enclave_unload_key(key_slot + 1);
         }
     }
+
     if(*valid_keys_nb == ENCLAVE_FACTORY_KEY_SLOTS)
         return true;
     else
