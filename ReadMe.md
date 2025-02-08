@@ -1,7 +1,14 @@
 <p align="center">
   <img src=".github/assets/logo.png" alt="Momentum Firmware">
-  <h2 align="center">for Flipper Zero</h2>
+  <h2 align="center">for Clipper One</h2>
+  <h2 align="center">This repository contains firmware that has been customized for Clipper One (a clone version of flipper zero), use wise but never on a stock Flipper Zero.</h2>
 </p>
+
+<h4 align="center">
+  For the keys in your device, check 
+  <a href="https://github.com/shilapi/Momentum-Firmware-Clipper/tree/dev/keys">keys</a>
+  folder. For the changelog, check commit history.
+</h4>
 
 <h2 align="center">
   <a href="#Install">Install</a> | <a href="#list-of-changes">Features</a> | <a href="https://discord.gg/momentum">Discord</a> | <a href="#%EF%B8%8F-support">Donate</a>
