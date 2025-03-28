@@ -17,7 +17,6 @@
 #include "scenes/power_settings_scene.h"
 
 typedef struct {
-    PowerSettings settings;
     Power* power;
     Gui* gui;
     SceneManager* scene_manager;
@@ -26,7 +25,6 @@ typedef struct {
     Submenu* submenu;
     DialogEx* dialog;
     PowerInfo info;
-    VariableItemList* variable_item_list;
 
     bool about_battery;
 } PowerSettingsApp;
