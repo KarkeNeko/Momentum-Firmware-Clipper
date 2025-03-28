@@ -1,12 +1,13 @@
 <p align="center">
-  <img src=".github/assets/logo.png" alt="Momentum 固件">
-  <h2 align="center">用于 Flipper Zero</h2>
+  <img src=".github/assets/logo.png" alt="Momentum Firmware">
+  <h2 align="center">适用于 Clipper One</h2>
+  <h2 align="center">此仓库包含专为 Clipper One（Flipper Zero 的克隆版）定制的固件，请谨慎使用，切勿用于原版 Flipper Zero。</h2>
 </p>
 
 <h4 align="center">
-  For the keys in your device, check 
+  设备中的密钥请查看
   <a href="https://github.com/shilapi/Momentum-Firmware-Clipper/tree/dev/keys">keys</a>
-  folder. For the changelog, check commit history.
+  文件夹。更新日志请查看提交历史。
 </h4>
 
 <h2 align="center">
