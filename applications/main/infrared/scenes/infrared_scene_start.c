@@ -45,17 +45,6 @@ void infrared_scene_start_on_enter(void* context) {
 
     submenu_add_lockable_item(
         submenu,
-        "学习新遥控器 RAW",
-        SubmenuIndexLearnNewRemoteRaw,
-        infrared_scene_start_submenu_callback,
-        infrared,
-        !infrared->app_state.is_debug_enabled,
-        "启用\n"
-        "设置 >\n"
-        "系统 >\n"
-        "调试");
-    submenu_add_lockable_item(
-        submenu,
         "调试 RX",
         SubmenuIndexDebug,
         infrared_scene_start_submenu_callback,

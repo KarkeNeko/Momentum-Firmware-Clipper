@@ -71,8 +71,8 @@ void power_settings_scene_start_on_enter(void* context) {
     item = variable_item_list_add(
         variable_item_list,
         "闲置时关机",
-        SHUTDOWN_IDLE_DELAY_COUNT,
-        power_settings_scene_start_auto_lock_delay_changed,
+        AUTO_POWEROFF_DELAY_COUNT,
+        power_settings_scene_start_auto_poweroff_delay_changed, //function for change visible item list value and app settings
         app);
 
     value_index = value_index_uint32(
