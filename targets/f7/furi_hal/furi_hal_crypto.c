@@ -3,6 +3,7 @@
 #include <furi_hal_bt.h>
 #include <furi_hal_random.h>
 #include <furi_hal_bus.h>
+#include <momentum/momentum.h>
 
 #include <stm32wbxx_ll_cortex.h>
 #include <furi.h>
