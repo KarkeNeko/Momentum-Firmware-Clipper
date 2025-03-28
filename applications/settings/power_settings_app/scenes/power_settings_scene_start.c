@@ -11,7 +11,7 @@ enum PowerSettingsSubmenuIndex {
 
 #define AUTO_POWEROFF_DELAY_COUNT 13
 const char* const auto_poweroff_delay_text[AUTO_POWEROFF_DELAY_COUNT] = {
-    "OFF",
+    "禁用",
     "5min",
     "10min",
     "15min",
@@ -40,6 +40,19 @@ const uint32_t auto_poweroff_delay_value[AUTO_POWEROFF_DELAY_COUNT] = {
     86400000,
     172800000};
 
+#define CHARGE_SUPRESS_STEP 5
+
+// change variable_item_list visible text and charge_supress_percent_settings when user change item in variable_item_list
+static void power_settings_scene_start_charge_supress_percent_changed(VariableItem* item) {
+    PowerSettingsApp* app = variable_item_get_context(item);
+    uint32_t value = (variable_item_get_current_value_index(item) + 1) * CHARGE_SUPRESS_STEP;
+    char charge_supress_str[6];
+    snprintf(charge_supress_str, sizeof(charge_supress_str), "%lu%%", value);
+
+    variable_item_set_current_value_text(item, charge_supress_str);
+    app->settings.charge_supress_percent = value == 100 ? 0 : value;
+}
+
 // change variable_item_list visible text and app_poweroff_delay_time_settings when user change item in variable_item_list
 static void power_settings_scene_start_auto_poweroff_delay_changed(VariableItem* item) {
     PowerSettingsApp* app = variable_item_get_context(item);
@@ -50,6 +63,7 @@ static void power_settings_scene_start_auto_poweroff_delay_changed(VariableItem*
 }
 
 static void power_settings_scene_start_submenu_callback(void* context, uint32_t index) {
+    //show selected menu screen by index
     furi_assert(context);
     PowerSettingsApp* app = context;
     view_dispatcher_send_custom_event(app->view_dispatcher, index);
@@ -62,17 +76,17 @@ void power_settings_scene_start_on_enter(void* context) {
     VariableItem* item;
     uint8_t value_index;
 
-    variable_item_list_add(variable_item_list, "Battery Info", 1, NULL, NULL);
+    variable_item_list_add(variable_item_list, "电池信息", 1, NULL, NULL);
 
-    variable_item_list_add(variable_item_list, "Reboot", 1, NULL, NULL);
+    variable_item_list_add(variable_item_list, "重启", 1, NULL, NULL);
 
-    variable_item_list_add(variable_item_list, "Power OFF", 1, NULL, NULL);
+    variable_item_list_add(variable_item_list, "关机", 1, NULL, NULL);
 
     item = variable_item_list_add(
         variable_item_list,
-        "Auto PowerOff",
+        "闲置时关机",
         AUTO_POWEROFF_DELAY_COUNT,
-        power_settings_scene_start_auto_poweroff_delay_changed, //function for change visible item list value and app settings
+        power_settings_scene_start_auto_poweroff_delay_changed,
         app);
 
     value_index = value_index_uint32(
@@ -82,13 +96,26 @@ void power_settings_scene_start_on_enter(void* context) {
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, auto_poweroff_delay_text[value_index]);
 
+    item = variable_item_list_add(
+        variable_item_list,
+        "Limit Charge",
+        100 / CHARGE_SUPRESS_STEP,
+        power_settings_scene_start_charge_supress_percent_changed,
+        app);
+
+    uint8_t value =
+        app->settings.charge_supress_percent == 0 ? 100 : app->settings.charge_supress_percent;
+    value_index = (value / CHARGE_SUPRESS_STEP) - 1;
+    char charge_supress_str[6];
+    snprintf(charge_supress_str, sizeof(charge_supress_str), "%u%%", value);
+    variable_item_set_current_value_index(item, value_index);
+    variable_item_set_current_value_text(item, charge_supress_str);
+
     variable_item_list_set_selected_item(
         variable_item_list,
         scene_manager_get_scene_state(app->scene_manager, PowerSettingsAppSceneStart));
-
     variable_item_list_set_enter_callback(
         variable_item_list, power_settings_scene_start_submenu_callback, app);
-
     view_dispatcher_switch_to_view(app->view_dispatcher, PowerSettingsAppViewVariableItemList);
 }
 
