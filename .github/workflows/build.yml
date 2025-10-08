@@ -50,7 +50,6 @@ jobs:
           echo "FBT_BUILD_TYPE=$BUILD_TYPE" >> $GITHUB_ENV
           echo "TARGET=${{ matrix.target }}" >> $GITHUB_ENV
           echo "TARGET_HW=$(echo "${{ matrix.target }}" | sed 's/f//')" >> $GITHUB_ENV
-
       - name: "Check API versions for consistency between targets"
         run: |
           set -e
@@ -61,12 +60,11 @@ jobs:
             head -n2 targets/f*/api_symbols.csv
             exit 1
           fi
-
       - name: "Check API version for consistency with OFW release-candidate"
         run: |
           set -e
           symbols="targets/$TARGET/api_symbols.csv"
-          ofw_api="$(curl -s "https://raw.githubusercontent.com/flipperdevices/flipperzero-firmware/release-candidate/${symbols}" | head -n2)"
+          ofw_api="$(curl -s "https://raw.githubusercontent.com/flipperdevices/flipperzero-firmware/refs/heads/release/${symbols}" | head -n2)"
           our_api="$(head -n2 "${symbols}")"
           if [ "$our_api" != "$ofw_api" ] ; then
             echo API versions aren\'t matching OFW. Please update!
@@ -75,24 +73,20 @@ jobs:
             echo "Momentum: $(tail -n1 <<< "$our_api")"
             exit 1
           fi
-
       - name: "Build the firmware and apps"
         id: build-fw
         run: |
           ./fbt TARGET_HW=$TARGET_HW $FBT_BUILD_TYPE copro_dist updater_package fap_dist
           echo "firmware_api=$(./fbt TARGET_HW=$TARGET_HW get_apiversion)" >> $GITHUB_OUTPUT
-
       - name: "Check for uncommitted changes"
         run: |
           git diff --exit-code
-
       - name: "Upload artifacts to GitHub"
         uses: actions/upload-artifact@v4
         with:
           path: |
             dist/${{ env.TARGET }}-*/flipper-z-${{ env.TARGET }}-update-*
             dist/${{ env.TARGET }}-*/flipper-z-${{ env.TARGET }}-sdk-*
-
       - name: "Copy build output"
         env:
           INDEXER_URL: ${{ secrets.INDEXER_URL }}
@@ -110,7 +104,6 @@ jobs:
           echo "ARTIFACT_TAG=$ARTIFACT_TAG" >> $GITHUB_ENV
           VERSION_TAG="$(basename "$(realpath .)" | cut -d- -f3-)"
           echo "VERSION_TAG=$VERSION_TAG" >> $GITHUB_ENV
-
       - name: "Copy universal artifacts"
         env:
           INDEXER_URL: ${{ secrets.INDEXER_URL }}
@@ -118,7 +111,6 @@ jobs:
         run: |
           tar czpf "artifacts/flipper-z-any-scripts-${SUFFIX}.tgz" scripts
           cp build/core2_firmware.tgz "artifacts/flipper-z-any-core2_firmware-${SUFFIX}.tgz"
-
       - name: "Calculate DFU sizes"
         env:
           INDEXER_URL: ${{ secrets.INDEXER_URL }}
@@ -132,18 +124,16 @@ jobs:
           DFU_DIFF=$(echo $dfu_size_diff | numfmt --to=iec-i --format=%.2fB | sed 's/.00B$/B/' | sed -r 's/^([^-])/+\1/')
           echo "DFU_SIZE=$DFU_SIZE" >> $GITHUB_ENV
           echo "DFU_DIFF=$DFU_DIFF" >> $GITHUB_ENV
-
           tar xzf build/core2_firmware.tgz
           radio_addr=$(jq -r '.copro.radio.files[0].address' core2_firmware/Manifest.json)
           flash_base=0x8000000
-          min_gap=$((0 * 4 * 1024))
+          min_gap=$((2 * 4 * 1024))
           flash_free_total=$((radio_addr - flash_base - dfu_size_new))
           flash_free_usable=$((flash_free_total - min_gap))
           FLASH_FREE=$(echo $flash_free_total | numfmt --to=iec-i --format=%.2fB | sed 's/.00B$/B/')
           FLASH_USABLE=$(echo $flash_free_usable | numfmt --to=iec-i --format=%.2fB | sed 's/.00B$/B/')
           echo "FLASH_FREE=$FLASH_FREE" >> $GITHUB_ENV
           echo "FLASH_USABLE=$FLASH_USABLE" >> $GITHUB_ENV
-
       - name: "Upload artifacts to update server"
         env:
           INDEXER_URL: ${{ secrets.INDEXER_URL }}
@@ -156,7 +146,6 @@ jobs:
               -F "version_token=${COMMIT_SHA}" \
               ${FILES[@]} \
               "${{ secrets.INDEXER_URL }}"/firmware/uploadfiles
-
       - name: "Find previous comment"
         env:
           INDEXER_URL: ${{ secrets.INDEXER_URL }}
